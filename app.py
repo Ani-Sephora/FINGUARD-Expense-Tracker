@@ -29,7 +29,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"pdf", "csv", "xls", "xlsx"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-GEMINI_API_KEY = "AIzaSyBuEuYpLw3cUG09Ejzr9iSbgAzIYWqJpXk"
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
 
 EXPENSE_CATEGORIES = [
     {"name": "Home & Living", "icon": "home", "color": "#8b5cf6", "subcategories": ["Rent", "House Maintenance", "Furniture", "Interior/Decor", "Cleaning Supplies", "Maid Salary", "Gas Cylinder", "Water Bill", "Electricity Bill", "Internet/Wi-Fi", "Mobile Recharge", "DTH/Cable TV"]},
