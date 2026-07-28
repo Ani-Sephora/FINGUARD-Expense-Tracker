@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Summary - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+        <div>
+          <p class="app-title">Goal</p>
+          <p class="app-subtitle">{{ username }} savings snapshot</p>
+        </div>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+    </header>
+
+    <section class="section">
+      <span class="eyebrow">Available goals</span>
+      <h2>Saved and balance</h2>
+      <div class="goal-list compact-goal-list">
+        {% for goal in goals %}
+          <article class="goal-card compact-goal-card">
+            <div class="goal-head">
+              <div>
+                <span class="eyebrow">Goal</span>
+                <h3>{{ goal.goal_name }}</h3>
+              </div>
+              <span class="pill">{{ goal.progress }}%</span>
+            </div>
+            <div class="meta-grid">
+              <div><span>Saved</span><strong>Rs. {{ goal.saved_amount }}</strong></div>
+              <div><span>Balance</span><strong>Rs. {{ goal.remaining_amount }}</strong></div>
+            </div>
+            <div class="progress-bar" aria-label="Goal progress">
+              <div class="progress-fill" style="width: {{ goal.progress }}%;">{{ goal.progress }}%</div>
+            </div>
+          </article>
+        {% else %}
+          <article class="goal-card">
+            <h3>No goals yet</h3>
+            <a class="btn secondary" href="{{ url_for('goal_planner') }}">Create goal</a>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+</body>
+</html>

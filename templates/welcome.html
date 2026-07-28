@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome Options - FinGuard</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 100px; background: #fefefe; }
+    .btn { padding: 15px 40px; margin: 30px; font-size: 18px; background: #2c3e50; color: white; border: none; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🎉 Welcome, {{ name }}!</h1>
+  <p>Select how you'd like to use FinGuard:</p>
+  <form method="POST" action="{{ url_for('select_mode') }}">
+    <button class="btn" name="mode" value="personal">🏠 Personal Tracker</button>
+    <button class="btn" name="mode" value="business" disabled>💼 Business Use (Coming Soon)</button>
+  </form>
+</body>
+</html>

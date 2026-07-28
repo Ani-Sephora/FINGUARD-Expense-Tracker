@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-hero">
+      <div class="auth-logo">FG</div>
+      <h1>FinGuard</h1>
+      <p>Your personal money app for expenses, savings, goals, and reports.</p>
+    </section>
+
+    <section class="auth-card">
+      <h2>Welcome back</h2>
+      <p>Sign in to continue tracking your money.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" class="form-grid">
+        <input type="text" name="username" placeholder="Username" autocomplete="username" required>
+        <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+        <button class="btn" type="submit">Login</button>
+      </form>
+
+      <a class="auth-link" href="{{ url_for('register') }}">Create a new account</a>
+    </section>
+  </main>
+</body>
+</html>

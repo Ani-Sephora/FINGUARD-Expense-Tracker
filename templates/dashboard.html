@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinGuard Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="mobile-shell home-screen">
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">{{ username[:1]|upper }}</div>
+        <div>
+          <p class="app-title">Hi, {{ username }}</p>
+          <p class="app-subtitle">Money overview</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="icon-button insights-button" href="{{ url_for('insights') }}" aria-label="Insights" title="Insights">i</a>
+        <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+        <a class="icon-button" href="{{ url_for('profile') }}" aria-label="Profile">{{ username[:1]|upper }}</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="balance-card">
+      <p class="balance-label">Available balance</p>
+      <h1 class="balance-value">Rs. {{ balance }}</h1>
+      <div class="balance-meta">
+        <div>
+          <span>Income</span>
+          <strong>Rs. {{ income }}</strong>
+        </div>
+        <div>
+          <span>Expense</span>
+          <strong>Rs. {{ total }}</strong>
+        </div>
+        <div>
+          <span>Saved</span>
+          <strong>Rs. {{ savings }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <nav class="quick-actions" aria-label="Quick actions">
+      <a class="quick-action" href="{{ url_for('add_transaction_categories') }}"><b>+</b><span>Add</span></a>
+      <a class="quick-action" href="{{ url_for('expense_galaxy') }}"><b>G</b><span>Galaxy</span></a>
+      <a class="quick-action" href="{{ url_for('transactions') }}"><b>H</b><span>History</span></a>
+      <a class="quick-action" href="{{ url_for('goal_quick') }}"><b>O</b><span>Goal</span></a>
+      <a class="quick-action" href="{{ url_for('tracker') }}"><b>T</b><span>Tracker</span></a>
+    </nav>
+
+    <section class="section insight-preview">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Insight of the Month</span>
+          <h2>{{ insight }}</h2>
+        </div>
+      </div>
+      <a class="btn secondary" href="{{ url_for('insights') }}">View More</a>
+    </section>
+
+    <section class="section home-summary">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Health</span>
+          <h2>Financial score</h2>
+        </div>
+        <span class="pill">{{ health_status }}</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Score</span>
+          <strong class="stat-value">{{ health_score }}/100</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Savings</span>
+          <strong class="stat-value positive">Rs. {{ savings }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a class="active" href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+
+  <div id="chatbot-btn" onclick="toggleChatbot()" title="Open FinGuard AI">AI</div>
+  <div id="chatbot-box">
+    <div id="chatbot-header">
+      <span>FinGuard AI</span>
+      <button type="button" class="chat-close" onclick="toggleChatbot()">Close</button>
+    </div>
+    <div id="chatbot-messages"></div>
+    <div id="chatbot-input-area">
+      <input type="text" id="chatbot-input" placeholder="Ask about saving or spending">
+      <button class="btn" type="button" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

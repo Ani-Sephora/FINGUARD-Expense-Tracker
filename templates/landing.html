@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-hero">
+      <div class="auth-logo">FG</div>
+      <h1>FinGuard</h1>
+      <p>A mobile money tracker for daily expenses, goals, reports, and balance clarity.</p>
+    </section>
+
+    <section class="auth-card">
+      <h2>Get started</h2>
+      <p>Open your personal finance app.</p>
+      <div class="form-grid">
+        <a class="btn" href="{{ url_for('login') }}">Login</a>
+        <a class="btn secondary" href="{{ url_for('register') }}">Create account</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

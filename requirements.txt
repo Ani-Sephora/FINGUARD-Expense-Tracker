@@ -1,0 +1,10 @@
+flask
+pandas
+scikit-learn
+nltk
+reportlab
+pillow
+opencv-python
+pdfplumber
+openpyxl
+google-generativeai

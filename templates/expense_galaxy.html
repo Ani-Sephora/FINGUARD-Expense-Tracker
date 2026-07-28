@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Galaxy - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page galaxy-page">
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">G</div>
+        <div>
+          <p class="app-title">Expense Galaxy</p>
+          <p class="app-subtitle">{{ username }} spending universe</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+      </div>
+    </header>
+
+    <section class="galaxy-stage">
+      <canvas id="expenseGalaxy" width="760" height="760" aria-label="Expense galaxy chart"></canvas>
+      <div class="galaxy-empty" id="galaxyEmpty" hidden>No expenses yet</div>
+      <div class="galaxy-tooltip" id="galaxyTooltip" hidden></div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script>
+    const galaxyData = {{ galaxy_data | tojson }};
+    const canvas = document.getElementById("expenseGalaxy");
+    const ctx = canvas.getContext("2d");
+    const empty = document.getElementById("galaxyEmpty");
+    const tooltip = document.getElementById("galaxyTooltip");
+    const state = { hover: -1, planets: [] };
+
+    function money(value) {
+      return `Rs. ${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+    }
+
+    function resizeCanvas() {
+      const size = Math.min(canvas.parentElement.clientWidth, 760);
+      const ratio = window.devicePixelRatio || 1;
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
+      canvas.width = size * ratio;
+      canvas.height = size * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function preparePlanets() {
+      const maxAmount = Math.max(...galaxyData.map(item => item.amount), 1);
+      const maxRing = Math.max(70, (canvas.clientWidth || 360) / 2 - 34);
+      state.planets = galaxyData.map((item, index) => {
+        const ring = 48 + (maxRing - 48) * ((index + 1) / Math.max(galaxyData.length, 1));
+        const radius = 8 + Math.sqrt(item.amount / maxAmount) * 16;
+        const speed = 0.003 + Math.min(item.count, 18) * 0.0009;
+        return { ...item, ring, radius, speed, angle: index * 1.45 };
+      });
+    }
+
+    function draw() {
+      const size = canvas.clientWidth || 360;
+      const center = size / 2;
+      ctx.clearRect(0, 0, size, size);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--galaxy-bg").trim() || "#071126";
+      ctx.fillRect(0, 0, size, size);
+
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.strokeStyle = "rgba(255,255,255,0.14)";
+      ctx.lineWidth = 1;
+      state.planets.forEach(planet => {
+        ctx.beginPath();
+        ctx.arc(0, 0, planet.ring, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      const balanceGradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 30);
+      balanceGradient.addColorStop(0, "#8b5cf6");
+      balanceGradient.addColorStop(0.45, "#5b21b6");
+      balanceGradient.addColorStop(1, "rgba(139,92,246,0)");
+      ctx.fillStyle = balanceGradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#c4b5fd";
+      ctx.font = "700 11px Inter, Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Balance", 0, 4);
+
+      state.planets.forEach((planet, index) => {
+        planet.angle += planet.speed;
+        planet.x = Math.cos(planet.angle) * planet.ring;
+        planet.y = Math.sin(planet.angle) * planet.ring;
+
+        const glow = ctx.createRadialGradient(planet.x, planet.y, 2, planet.x, planet.y, planet.radius * 2.6);
+        glow.addColorStop(0, planet.color);
+        glow.addColorStop(0.65, planet.color);
+        glow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.globalAlpha = index === state.hover ? 1 : 0.82;
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, planet.radius * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = planet.color;
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = index === state.hover ? "#c4b5fd" : "rgba(196,181,253,0.56)";
+        ctx.lineWidth = index === state.hover ? 3 : 1.4;
+        ctx.stroke();
+      });
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+
+    function showTooltip(index, event) {
+      const planet = state.planets[index];
+      tooltip.replaceChildren();
+
+      const category = document.createElement("strong");
+      category.textContent = planet.category;
+      tooltip.appendChild(category);
+
+      const summary = document.createElement("small");
+      summary.textContent = `${money(planet.amount)} - ${planet.count} ${planet.count === 1 ? "entry" : "entries"}`;
+      tooltip.appendChild(summary);
+
+      planet.breakdown.slice(0, 4).forEach(item => {
+        const row = document.createElement("div");
+        const name = document.createElement("span");
+        const amount = document.createElement("strong");
+        name.textContent = item.name;
+        amount.textContent = money(item.amount);
+        row.append(name, amount);
+        tooltip.appendChild(row);
+      });
+
+      const stageRect = canvas.parentElement.getBoundingClientRect();
+      const x = event.clientX - stageRect.left;
+      const y = event.clientY - stageRect.top;
+      tooltip.style.left = `${Math.max(12, Math.min(x + 14, stageRect.width - 190))}px`;
+      tooltip.style.top = `${Math.max(12, y - 18)}px`;
+      tooltip.hidden = false;
+    }
+
+    function handleCanvasMove(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      const hitIndex = state.planets.findIndex(planet => {
+        const dx = x - planet.x;
+        const dy = y - planet.y;
+        const hitRadius = Math.max(planet.radius + 14, planet.radius * 1.8);
+        return Math.sqrt(dx * dx + dy * dy) <= hitRadius;
+      });
+      state.hover = hitIndex;
+      canvas.style.cursor = hitIndex >= 0 ? "pointer" : "default";
+      if (hitIndex >= 0) {
+        showTooltip(hitIndex, event);
+      } else {
+        tooltip.hidden = true;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      empty.hidden = galaxyData.length > 0;
+      resizeCanvas();
+      preparePlanets();
+      draw();
+      canvas.addEventListener("mousemove", handleCanvasMove);
+      canvas.addEventListener("pointermove", handleCanvasMove);
+      canvas.addEventListener("mouseleave", () => {
+        state.hover = -1;
+        tooltip.hidden = true;
+      });
+      canvas.addEventListener("pointerleave", () => {
+        state.hover = -1;
+        tooltip.hidden = true;
+      });
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        preparePlanets();
+      });
+    });
+  </script>
+</body>
+</html>

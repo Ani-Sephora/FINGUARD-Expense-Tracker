@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">{{ user[:1]|upper }}</div>
+        <div>
+          <p class="app-title">Profile</p>
+          <p class="app-subtitle">{{ user }}</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+        <a class="icon-button" href="{{ url_for('logout') }}" aria-label="Logout">L</a>
+      </div>
+    </header>
+
+    <section class="section">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <span class="eyebrow">Account</span>
+      <h2>Settings</h2>
+      <div class="meta-grid">
+        <div><span>Username</span><strong>{{ user }}</strong></div>
+        <div><span>Password</span><strong>Email reset</strong></div>
+      </div>
+      <form action="/request-reset" method="get">
+        <button class="btn secondary" type="submit">Change password</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <span class="eyebrow">Bank import</span>
+      <h2>Statement upload</h2>
+      <form action="{{ url_for('upload_bank_file') }}" method="POST" enctype="multipart/form-data" class="form-grid">
+        <input type="file" id="bank_file" name="bank_file" accept=".pdf,.csv,.xls,.xlsx" required>
+        <button type="submit">Import transactions</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <span class="eyebrow">Export</span>
+      <h2>Transaction history</h2>
+      <a href="/download" class="btn secondary">Download history</a>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a class="active" href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+</body>
+</html>

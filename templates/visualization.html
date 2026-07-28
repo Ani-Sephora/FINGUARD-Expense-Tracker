@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">R</div>
+        <div>
+          <p class="app-title">Reports</p>
+          <p class="app-subtitle">Your monthly money view</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+      </div>
+    </header>
+
+    <section class="balance-card">
+      <p class="balance-label">Current balance</p>
+      <h1 class="balance-value">Rs. {{ balance }}</h1>
+      <div class="balance-meta">
+        <div><span>Income</span><strong>Rs. {{ income }}</strong></div>
+        <div><span>Expense</span><strong>Rs. {{ expense }}</strong></div>
+        <div><span>Saving</span><strong>Rs. {{ saving }}</strong></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <span class="eyebrow">Distribution</span>
+      <h2>Where money stands</h2>
+      <div class="chart-box">
+        <canvas id="pieChart"></canvas>
+      </div>
+    </section>
+
+    <section class="section">
+      <span class="eyebrow">Trend</span>
+      <h2>Income vs expense</h2>
+      <div class="chart-box">
+        <canvas id="comboChart"></canvas>
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a class="active" href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+
+  <script>
+    const income = {{ income }};
+    const expense = {{ expense }};
+    const saving = {{ saving }};
+    const balance = {{ balance }};
+
+    new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Expense', 'Savings', 'Balance'],
+        datasets: [{
+          data: [expense, saving, balance],
+          backgroundColor: ['#dc2626', '#16a34a', '#7c3aed'],
+          borderColor: '#ffffff',
+          borderWidth: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    const monthLabels = {{ month_labels | tojson }};
+    const monthlyIncome = {{ income_data | tojson }};
+    const monthlyExpense = {{ expense_data | tojson }};
+
+    new Chart(document.getElementById('comboChart'), {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: 'Income',
+            data: monthlyIncome,
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124, 58, 237, 0.14)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3
+          },
+          {
+            label: 'Expenses',
+            data: monthlyExpense,
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.10)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  </script>
+</body>
+</html>

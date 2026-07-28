@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracker - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+        <div>
+          <p class="app-title">Tracker</p>
+          <p class="app-subtitle">{{ period_label }} expense breakdown</p>
+        </div>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+    </header>
+
+    <section class="balance-card">
+      <p class="balance-label">{{ period_label }}</p>
+      <h1 class="balance-value">Rs. {{ total_amount }}</h1>
+      <div class="balance-meta">
+        <div><span>Mode</span><strong>{{ period|title }}</strong></div>
+        <div><span>Groups</span><strong>{{ tracker_rows|length }}</strong></div>
+      </div>
+    </section>
+
+    <nav class="period-tabs" aria-label="Tracker period">
+      <a class="{% if period == 'week' %}active{% endif %}" href="{{ url_for('tracker', period='week') }}">Week</a>
+      <a class="{% if period == 'month' %}active{% endif %}" href="{{ url_for('tracker', period='month') }}">Month</a>
+      <a class="{% if period == 'year' %}active{% endif %}" href="{{ url_for('tracker', period='year') }}">Year</a>
+    </nav>
+
+    <form class="period-selectors" method="GET" action="{{ url_for('tracker') }}">
+      <input type="hidden" name="period" value="{{ period }}">
+      {% if period == 'week' %}
+        <label>
+          <span class="eyebrow">Choose week</span>
+          <select name="week" onchange="this.form.submit()">
+            {% for value, label in week_options %}
+              <option value="{{ value }}" {% if value == selected_week %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% elif period == 'month' %}
+        <label>
+          <span class="eyebrow">Choose month</span>
+          <select name="month" onchange="this.form.submit()">
+            {% for value, label in month_options %}
+              <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% else %}
+        <label>
+          <span class="eyebrow">Choose year</span>
+          <select name="year" onchange="this.form.submit()">
+            {% for value in year_options %}
+              <option value="{{ value }}" {% if value == selected_year %}selected{% endif %}>{{ value }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% endif %}
+    </form>
+
+    <section class="section">
+      <span class="eyebrow">Subcategories</span>
+      <h2>Expense tracker</h2>
+      <div class="tracker-list">
+        {% for row in tracker_rows %}
+          <article class="tracker-card">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">{{ row.category }}</span>
+                <h3>{{ row.subcategory }}</h3>
+              </div>
+              <span class="pill">Rs. {{ row.total }}</span>
+            </div>
+            <div class="breakdown-list compact-breakdown">
+              {% for item in row.entries %}
+                <div class="breakdown-row">
+                  <span>{{ item.description }}</span>
+                  <strong>Rs. {{ item.amount }}</strong>
+                  <small>{{ item.date }} | {{ item.time }}</small>
+                </div>
+              {% endfor %}
+            </div>
+          </article>
+        {% else %}
+          <article class="goal-card">
+            <h3>No expenses in this period</h3>
+            <a class="btn secondary" href="{{ url_for('add_transaction_categories') }}">Add expense</a>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+</body>
+</html>

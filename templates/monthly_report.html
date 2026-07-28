@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 Monthly Report - FinGuard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .report-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 400px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #27ae60;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2ecc71;
+    }
+    .back {
+      margin-top: 15px;
+      display: block;
+      text-decoration: none;
+      color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="report-box">
+    <h2>📊 Download Monthly Report</h2>
+    <form method="POST" action="{{ url_for('download_report') }}">
+      <label for="months">Select Period:</label>
+      <select name="months" id="months" required>
+        <option value="1">Last 1 Month</option>
+        <option value="2">Last 2 Months</option>
+        <option value="3">Last 3 Months</option>
+        <option value="4">Last 4 Months</option>
+        <option value="5">Last 5 Months</option>
+        <option value="6">Last 6 Months</option>
+      </select>
+
+      <label for="format">Select Format:</label>
+      <select name="format" id="format" required>
+        <option value="csv">CSV</option>
+        <option value="pdf">PDF</option>
+      </select>
+
+      <button type="submit">⬇ Download</button>
+    </form>
+    <a class="back" href="{{ url_for('calendar_view') }}">⬅ Back to Calendar</a>
+  </div>
+</body>
+</html>

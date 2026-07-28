@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Planner - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <div class="avatar">G</div>
+        <div>
+          <p class="app-title">Goals</p>
+          <p class="app-subtitle">Plan your savings target</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+      </div>
+    </header>
+
+    <section class="section">
+      <span class="eyebrow">New goal</span>
+      <h2>Add target</h2>
+      <form action="{{ url_for('add_goal') }}" method="POST" class="form-grid">
+        <input type="text" name="goal_name" placeholder="Goal name" required>
+        <input type="number" step="0.01" name="target_amount" placeholder="Target amount in Rs." required>
+        <input type="date" name="target_date" required>
+        <button type="submit">Add goal</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <span class="eyebrow">Progress</span>
+      <h2>Your goals</h2>
+      <div class="goal-list">
+        {% for goal in goals %}
+        <article class="goal-card">
+          <div class="goal-head">
+            <div>
+              <span class="eyebrow">Target</span>
+              <h3>{{ goal.goal_name }}</h3>
+            </div>
+            <form action="{{ url_for('delete_goal', goal_id=goal.id) }}" method="POST">
+              <button type="submit" class="btn danger" onclick="return confirm('Do you want to delete this goal?')">Del</button>
+            </form>
+          </div>
+
+          <div class="meta-grid">
+            <div><span>Target</span><strong>Rs. {{ goal.target_amount }}</strong></div>
+            <div><span>Saved</span><strong>Rs. {{ goal.saved_amount }}</strong></div>
+            <div><span>Remaining</span><strong>Rs. {{ goal.remaining_amount }}</strong></div>
+            <div><span>Deadline</span><strong>{{ goal.target_date }}</strong></div>
+            <div><span>Days left</span><strong>{{ goal.days_left }}</strong></div>
+            <div><span>Daily need</span><strong>Rs. {{ goal.daily_required }}</strong></div>
+          </div>
+
+          <div class="progress-bar" aria-label="Goal progress">
+            <div class="progress-fill" style="width: {{ goal.progress }}%;">{{ goal.progress }}%</div>
+          </div>
+        </article>
+        {% else %}
+        <article class="goal-card">
+          <h3>No goals yet</h3>
+          <p class="tx-sub">Add your first savings target above.</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="App tabs">
+      <a href="{{ url_for('dashboard') }}"><b>H</b><span>Home</span></a>
+      <a href="{{ url_for('visualization') }}"><b>R</b><span>Reports</span></a>
+      <a href="{{ url_for('calendar_view') }}"><b>C</b><span>Calendar</span></a>
+      <a class="active" href="{{ url_for('goal_planner') }}"><b>G</b><span>Goals</span></a>
+      <a href="{{ url_for('profile') }}"><b>P</b><span>Profile</span></a>
+    </nav>
+  </main>
+</body>
+</html>

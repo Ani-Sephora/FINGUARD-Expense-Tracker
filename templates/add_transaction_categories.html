@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Transaction - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <a class="icon-button back-button" href="{{ url_for('dashboard') }}" aria-label="Back">&larr;</a>
+        <div>
+          <p class="app-title">Add transaction</p>
+          <p class="app-subtitle">Choose expense category</p>
+        </div>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="section">
+      <div class="section-head add-section-head">
+        <div>
+          <span class="eyebrow">Add</span>
+          <h2>Expense, income, saving, goal</h2>
+        </div>
+        <div class="search-shell">
+          <button class="search-toggle" type="button" aria-label="Search categories" title="Search categories"></button>
+          <input class="compact-search" type="search" id="categorySearch" placeholder="Search" aria-label="Search categories">
+        </div>
+      </div>
+
+      <div class="entry-mode-tabs" aria-label="Add type">
+        <button class="mode-tab active" type="button" data-entry-mode="expense">Expense</button>
+        <button class="mode-tab" type="button" data-entry-mode="income">Income</button>
+        <button class="mode-tab" type="button" data-entry-mode="saving">Saving</button>
+        <button class="mode-tab" type="button" data-entry-mode="goal">Goal</button>
+      </div>
+
+      <div class="category-grid page-category-grid">
+        {% for category in expense_categories %}
+          <a class="category-button"
+             href="{{ url_for('add_transaction_subcategories', category_slug=category.slug) }}"
+             data-category-card
+             data-search="{{ category.name }} {{ category.subcategories|join(' ') }}">
+            <span class="category-icon icon-{{ category.icon }}"></span>
+            <span>{{ category.name }}</span>
+          </a>
+        {% endfor %}
+      </div>
+
+      <form method="POST" action="{{ url_for('add_entry') }}" class="form-grid mode-panel" data-mode-panel="income" hidden>
+        <input type="hidden" name="type" value="income">
+        <input type="hidden" name="category" id="incomeCategoryInput" value="{{ income_categories[0] }}">
+        <input type="hidden" name="subcategory" id="incomeSubcategoryInput" value="{{ income_categories[0] }}">
+        <input type="hidden" name="description" id="incomeDescriptionInput" value="{{ income_categories[0] }}">
+        <input type="hidden" name="emotion" value="Neutral">
+        <div class="subcategory-grid">
+          {% for income_category in income_categories %}
+            <button class="subcategory-chip income-chip {% if loop.first %}selected{% endif %}" type="button" data-income-category="{{ income_category }}">{{ income_category }}</button>
+          {% endfor %}
+        </div>
+        <input type="number" step="0.01" min="0.01" name="amount" placeholder="Amount in Rs." required>
+        <input type="datetime-local" name="timestamp" class="timestamp-input">
+        <button type="submit">Save income</button>
+      </form>
+
+      <form method="POST" action="{{ url_for('add_entry') }}" class="form-grid mode-panel" data-mode-panel="saving" hidden>
+        <input type="hidden" name="type" value="saving">
+        <input type="hidden" name="category" value="Saving">
+        <input type="hidden" name="subcategory" value="General saving">
+        <input type="hidden" name="emotion" value="Neutral">
+        <input type="text" name="description" placeholder="Saving note" value="Savings" required>
+        <input type="number" step="0.01" min="0.01" name="amount" placeholder="Amount in Rs." required>
+        <input type="datetime-local" name="timestamp" class="timestamp-input">
+        <button type="submit">Save amount</button>
+      </form>
+
+      <form method="POST" action="{{ url_for('add_goal_saving') }}" class="form-grid mode-panel" data-mode-panel="goal" hidden>
+        {% if goals %}
+          <select name="goal_id" required>
+            {% for goal in goals %}
+              <option value="{{ goal.id }}">{{ goal.goal_name }} - balance Rs. {{ goal.remaining_amount }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" step="0.01" min="0.01" name="amount" placeholder="Amount in Rs." required>
+          <input type="datetime-local" name="timestamp" class="timestamp-input">
+          <button type="submit">Add to goal</button>
+        {% else %}
+          <div class="empty-state">
+            <h3>No goals yet</h3>
+            <a class="btn secondary" href="{{ url_for('goal_planner') }}">Create goal</a>
+          </div>
+        {% endif %}
+      </form>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script>
+    function setNow(input) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      input.value = now.toISOString().slice(0, 16);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".timestamp-input").forEach(setNow);
+      const tabs = document.querySelectorAll("[data-entry-mode]");
+      const categoryGrid = document.querySelector(".page-category-grid");
+      const panels = document.querySelectorAll("[data-mode-panel]");
+      const search = document.getElementById("categorySearch");
+      const searchShell = document.querySelector(".search-shell");
+      const searchToggle = document.querySelector(".search-toggle");
+      const cards = document.querySelectorAll("[data-category-card]");
+      const incomeCategoryInput = document.getElementById("incomeCategoryInput");
+      const incomeSubcategoryInput = document.getElementById("incomeSubcategoryInput");
+      const incomeDescriptionInput = document.getElementById("incomeDescriptionInput");
+
+      function showMode(mode) {
+        tabs.forEach(tab => tab.classList.toggle("active", tab.dataset.entryMode === mode));
+        categoryGrid.hidden = mode !== "expense";
+        searchShell.hidden = mode !== "expense";
+        panels.forEach(panel => {
+          panel.hidden = panel.dataset.modePanel !== mode;
+        });
+      }
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => showMode(tab.dataset.entryMode));
+      });
+
+      search.addEventListener("input", () => {
+        const query = search.value.trim().toLowerCase();
+        cards.forEach(card => {
+          card.hidden = query && !card.dataset.search.toLowerCase().includes(query);
+        });
+      });
+
+      searchToggle.addEventListener("click", () => {
+        searchShell.classList.toggle("open");
+        if (searchShell.classList.contains("open")) {
+          search.focus();
+        } else {
+          search.value = "";
+          search.dispatchEvent(new Event("input"));
+        }
+      });
+
+      document.querySelectorAll(".income-chip").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".income-chip").forEach(item => item.classList.remove("selected"));
+          button.classList.add("selected");
+          incomeCategoryInput.value = button.dataset.incomeCategory;
+          incomeSubcategoryInput.value = button.dataset.incomeCategory;
+          incomeDescriptionInput.value = button.dataset.incomeCategory;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

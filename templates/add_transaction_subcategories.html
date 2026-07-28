@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ category.name }} - FinGuard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="header-user">
+        <a class="icon-button back-button" href="{{ url_for('add_transaction_categories') }}" aria-label="Back">&larr;</a>
+        <div>
+          <p class="app-title">{{ category.name }}</p>
+          <p class="app-subtitle">Choose detail</p>
+        </div>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Change theme" title="Change theme"></button>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category_name, message in messages %}
+            <div class="flash {{ category_name }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="section">
+      <div class="section-head add-section-head">
+        <div>
+          <span class="eyebrow">Expense detail</span>
+          <h2>{{ category.name }}</h2>
+        </div>
+        <input class="compact-search" type="search" id="subcategorySearch" placeholder="Search">
+      </div>
+      <div class="subcategory-grid subcategory-page-grid">
+        {% for subcategory in category.subcategories %}
+          <button class="subcategory-chip" type="button" data-subcategory="{{ subcategory }}">{{ subcategory }}</button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="section entry-form-section" id="entryFormSection" hidden>
+      <span class="eyebrow" id="selectedSubcategoryLabel">Amount</span>
+      <h2>Add amount</h2>
+      <form method="POST" action="{{ url_for('add_entry') }}" class="form-grid">
+        <input type="hidden" name="type" value="expense">
+        <input type="hidden" name="category" value="{{ category.name }}">
+        <input type="hidden" name="subcategory" id="subcategoryInput">
+        <input type="hidden" name="description" id="descriptionInput">
+        <input type="hidden" name="emotion" value="Neutral">
+        <input type="number" step="0.01" min="0.01" name="amount" placeholder="Amount in Rs." required>
+        <input type="datetime-local" name="timestamp" id="timestampInput">
+        <button type="submit">Save transaction</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById("timestampInput").value = now.toISOString().slice(0, 16);
+
+      const section = document.getElementById("entryFormSection");
+      const label = document.getElementById("selectedSubcategoryLabel");
+      const subcategoryInput = document.getElementById("subcategoryInput");
+      const descriptionInput = document.getElementById("descriptionInput");
+      const subcategorySearch = document.getElementById("subcategorySearch");
+
+      document.querySelectorAll(".subcategory-chip").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".subcategory-chip").forEach(item => item.classList.remove("selected"));
+          button.classList.add("selected");
+          subcategoryInput.value = button.dataset.subcategory;
+          descriptionInput.value = button.dataset.subcategory;
+          label.textContent = button.dataset.subcategory;
+          section.hidden = false;
+          section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      });
+
+      subcategorySearch.addEventListener("input", () => {
+        const query = subcategorySearch.value.trim().toLowerCase();
+        document.querySelectorAll(".subcategory-chip").forEach(button => {
+          button.hidden = query && !button.dataset.subcategory.toLowerCase().includes(query);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

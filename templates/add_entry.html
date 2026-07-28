@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Entry - FinGuard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .type-switch {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .type-switch label {
+      font-size: 18px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .cat-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background: #ecf0f1;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .cat-btn:hover, .cat-btn.selected {
+      border-color: #3498db;
+      background: #d0ebff;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .emoji {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Add New Entry</h2>
+  <form action="/add_entry" method="POST">
+    <div class="type-switch">
+      <label><input type="radio" name="type" value="income" required> 💰 Income</label>
+      <label><input type="radio" name="type" value="expense"> 💸 Expense</label>
+    </div>
+
+    <div class="categories" id="categoryList">
+      {% set categories = [
+        ("🍔", "Food"), ("🚌", "Transport"), ("🏥", "Health"),
+        ("🎮", "Entertainment"), ("🏠", "Home"), ("📚", "Education"),
+        ("🛒", "Shopping"), ("🚗", "Car"), ("🎁", "Gift"),
+        ("💻", "Electronics"), ("✈️", "Travel"), ("📞", "Telephone"),
+        ("👶", "Baby"), ("💄", "Beauty"), ("🍇", "Fruit")
+      ] %}
+      {% for emoji, name in categories %}
+        <div class="cat-btn" onclick="selectCategory('{{ name }}', this)">
+          <div class="emoji">{{ emoji }}</div>
+          <div>{{ name }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <input type="hidden" name="category" id="categoryInput" required>
+
+    <input type="text" name="description" placeholder="Description" required>
+    <input type="number" name="amount" placeholder="Amount (₹)" required>
+    <input type="date" name="date" required>
+
+    <div style="text-align: center;">
+      <button type="submit">Save Entry</button>
+    </div>
+  </form>
+
+  <script>
+    function selectCategory(name, el) {
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('categoryInput').value = name;
+    }
+  </script>
+</body>
+</html>
